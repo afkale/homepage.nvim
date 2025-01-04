@@ -32,4 +32,3 @@ require("lazy").setup({
     },
 })
 ```
-![image](./homepage.png)
