@@ -1,5 +1,6 @@
 # Vim Homepage Plugin
 The Vim Homepage Plugin is a lightweight and customizable plugin designed to display a homepage. It allows you to load a custom homepage from a file, center its content, and apply custom highlighting.
+![image](./homepage.png)
 
 ## Features
 - Load a homepage from a file.
