@@ -1,14 +1,6 @@
 -- Main module for the Homepage plugin
 local M = {}
 
--- Table to store the homepage header
-M.homepage = {}
-M.default_opts = {
-	homepage_file = "../data/homepage",
-	color = "#00ff00",
-	highlight_name = "HomepageHighlight",
-}
-
 -- Load messages from the file at file_path
 function M.load_homepage(file_path)
 	-- Add plugin_dir to default path
@@ -105,6 +97,15 @@ function M.setup_highlight()
 		bold = true,
 	})
 end
+
+-- Table to store the homepage header
+M.homepage = {}
+-- Default homepage configurations
+M.default_opts = {
+	homepage_file = "../data/homepage",
+	color = "#00ff00",
+	highlight_name = "HomepageHighlight",
+}
 
 -- Set up the plugin
 function M.setup(opts)
