@@ -101,7 +101,14 @@ function M.setup(opts)
 	M.opts.homepage_file = M.opts.homepage_file or "../data/homepage"
 	M.opts.higlight = M.opts.higlight or "RainbowDelimiterGreen"
 
-	M.load_homepage(M.opts.homepage_file)
+	vim.api.nvim_create_autocmd("VimEnter", {
+		callback = function()
+			if vim.fn.argc() == 0 then
+				M.load_homepage(M.opts.homepage_file)
+			end
+		end,
+		pattern = "*",
+	})
 end
 
 -- Return the module
