@@ -10,12 +10,12 @@ The Vim Homepage Plugin is a lightweight and customizable plugin designed to dis
 ## Instalation
 ### [Using vim-plug](https://github.com/junegunn/vim-plug)
 ```vim
-Plug 'afkale/homepage.nvim'
+Plug "afkale/homepage.nvim"
 ```
 
 ### [Using packer.nvim](https://github.com/wbthomason/packer.nvim)
 ```lua
-use 'afkale/homepage.nvim'
+use "afkale/homepage.nvim"
 ```
 
 ### [Using lazy.nvim](https://github.com/folke/lazy.nvim)
