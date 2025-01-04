@@ -3,6 +3,11 @@ local M = {}
 
 -- Table to store the homepage header
 M.homepage = {}
+M.default_opts = {
+	homepage_file = "../data/homepage",
+	color = "#00ff00",
+	highlight_name = "HomepageHighlight",
+}
 
 -- Load messages from the file at file_path
 function M.load_homepage(file_path)
@@ -52,9 +57,9 @@ function M.print_homepage()
 	-- Set the buffer to the current window
 	vim.api.nvim_win_set_buf(0, buf)
 
-	-- Apply the hightlight
+	-- Apply the highlight
 	for i = 0, #M.homepage - 1 do
-		vim.api.nvim_buf_add_highlight(buf, -1, M.opts.higlight, i, 0, -1)
+		vim.api.nvim_buf_add_highlight(buf, -1, M.opts.highlight_name, i, 0, -1)
 	end
 
 	-- Clean buffer user custom settings
@@ -93,15 +98,26 @@ function M.clean_homepage(buf)
 	})
 end
 
+function M.setup_highlight()
+	-- Define a highlight group with the specified color
+	vim.api.nvim_set_hl(0, M.opts.highlight_name, {
+		fg = M.opts.color,
+		bold = true,
+	})
+end
+
 -- Set up the plugin
 function M.setup(opts)
-	M.opts = opts or {}
+	-- Merge opts
+	M.opts = vim.tbl_deep_extend("force", M.default_opts, opts or {})
 
-	-- Load param options or use default values
-	M.opts.homepage_file = M.opts.homepage_file or "../data/homepage"
-	M.opts.higlight = M.opts.higlight or "RainbowDelimiterGreen"
+	-- Setup the highlight color from hex color in opts
+	M.setup_highlight()
+
+	-- Load homepage
 	M.load_homepage(M.opts.homepage_file)
 
+	-- Autocmd to print the homepage on init
 	vim.api.nvim_create_autocmd("VimEnter", {
 		callback = function()
 			if vim.fn.argc() == 0 then
@@ -111,6 +127,13 @@ function M.setup(opts)
 		pattern = "*",
 	})
 end
+
+-- Automatically setup
+setmetatable(M, {
+	__call = function(_, opts)
+		M.setup(opts)
+	end,
+})
 
 -- Return the module
 return M
