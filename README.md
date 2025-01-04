@@ -4,8 +4,8 @@ The Vim Homepage Plugin is a lightweight and customizable plugin designed to dis
 ## Features
 - Load a homepage from a file.
 - Automatically center the content in the Vim window.
-- Customizable colors and highlight groups.
-- Automatically display the homepage when Vim starts with no file arguments.
+- Customizable color.
+- Automatically display the homepage on startup.
 
 ## Instalation
 ### [Using vim-plug](https://github.com/junegunn/vim-plug)
