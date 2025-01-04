@@ -2,16 +2,20 @@
 local M = {}
 
 -- Load messages from the file at file_path
-function M.load_homepage(file_path)
-	-- Add plugin_dir to default path
-	if file_path == M.opts.homepage_file then
+function M.load_homepage()
+	local file_path = M.opts.homepage_file
+
+	-- Add dir path if file is inside of the library
+	if M.default_opts.homepage_file == file_path then
 		local plugin_dir = debug.getinfo(1, "S").source:match("@(.*/)") or "./"
 		file_path = plugin_dir .. file_path
 	end
 
+	-- Load file from the file_path
 	local file = io.open(file_path, "r")
+
 	if not file then
-		vim.notify("Failed to load homepage file: " .. file_path, vim.log.levels.ERROR)
+		vim.notify("Failed to load homepage file: " .. M.opts.homepage_file, vim.log.levels.ERROR)
 		return
 	end
 
@@ -30,9 +34,6 @@ function M.print_homepage()
 	-- Base padding
 	local default_padding = math.floor(vim.o.columns / 2)
 
-	-- Create a new buffer
-	local buf = vim.api.nvim_create_buf(false, true)
-
 	local aligned_homepage = {}
 	for _, line in ipairs(M.homepage) do
 		-- Calculate padding to center content
@@ -44,21 +45,35 @@ function M.print_homepage()
 	end
 
 	-- Print the centered content into the buffer
-	vim.api.nvim_buf_set_lines(buf, 0, -1, false, aligned_homepage)
+	vim.api.nvim_buf_set_lines(M.buf, 0, -1, false, aligned_homepage)
 
 	-- Set the buffer to the current window
-	vim.api.nvim_win_set_buf(0, buf)
+	vim.api.nvim_win_set_buf(0, M.buf)
 
 	-- Apply the highlight
 	for i = 0, #M.homepage - 1 do
-		vim.api.nvim_buf_add_highlight(buf, -1, M.opts.highlight_name, i, 0, -1)
+		vim.api.nvim_buf_add_highlight(M.buf, -1, M.opts.highlight_name, i, 0, -1)
 	end
-
-	-- Clean buffer user custom settings
-	M.clean_homepage(buf)
 end
 
-function M.clean_homepage(buf)
+function M.setup_homepage()
+	-- Create a new buffer
+	M.buf = vim.api.nvim_create_buf(false, true)
+
+	-- Set the homepage title
+	vim.api.nvim_buf_set_name(M.buf, M.opts.title)
+
+	-- Print homepage in buffer
+	M.print_homepage()
+
+	-- Setup the highlight color from hex color in opts
+	M.setup_highlight()
+
+	-- Clean buffer user custom settings
+	M.clean_homepage()
+end
+
+function M.clean_homepage()
 	-- Save old window settings
 	local ows = {
 		colorcolumn = vim.api.nvim_get_option_value("colorcolumn", { win = 0 }),
@@ -68,9 +83,9 @@ function M.clean_homepage(buf)
 	}
 
 	-- Set buffer options
-	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
-	vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
-	vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = M.buf })
+	vim.api.nvim_set_option_value("buftype", "nofile", { buf = M.buf })
+	vim.api.nvim_set_option_value("modifiable", false, { buf = M.buf })
 
 	-- Delete user window settings
 	vim.api.nvim_set_option_value("colorcolumn", "0", { win = 0 })
@@ -80,7 +95,7 @@ function M.clean_homepage(buf)
 
 	-- Restore the old window settings when leaving homepage buffer
 	vim.api.nvim_create_autocmd("BufLeave", {
-		buffer = buf,
+		buffer = M.buf,
 		callback = function()
 			vim.api.nvim_set_option_value("colorcolumn", ows.colorcolumn, { win = 0 })
 			vim.api.nvim_set_option_value("cursorline", ows.cursorline, { win = 0 })
@@ -103,6 +118,7 @@ M.homepage = {}
 -- Default homepage configurations
 M.default_opts = {
 	homepage_file = "../data/homepage",
+	title = "homepage",
 	color = "#00ff00",
 	highlight_name = "HomepageHighlight",
 }
@@ -112,17 +128,14 @@ function M.setup(opts)
 	-- Merge opts
 	M.opts = vim.tbl_deep_extend("force", M.default_opts, opts or {})
 
-	-- Setup the highlight color from hex color in opts
-	M.setup_highlight()
-
 	-- Load homepage
-	M.load_homepage(M.opts.homepage_file)
+	M.load_homepage()
 
 	-- Autocmd to print the homepage on init
 	vim.api.nvim_create_autocmd("VimEnter", {
 		callback = function()
 			if vim.fn.argc() == 0 then
-				M.print_homepage()
+				M.setup_homepage()
 			end
 		end,
 		pattern = "*",
