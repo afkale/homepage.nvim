@@ -7,7 +7,7 @@ M.homepage = {}
 -- Load messages from the file at file_path
 function M.load_homepage(file_path)
 	-- Add plugin_dir to default path
-	if file_path == "../data/pepe" then
+	if file_path == M.opts.homepage_file then
 		local plugin_dir = debug.getinfo(1, "S").source:match("@(.*/)") or "./"
 		file_path = plugin_dir .. file_path
 	end
@@ -36,13 +36,10 @@ function M.print_homepage()
 	-- Create a new buffer
 	local buf = vim.api.nvim_create_buf(false, true)
 
-	-- Clean buffer user custom settings
-	M.clean_homepage(buf)
-
 	local aligned_homepage = {}
 	for _, line in ipairs(M.homepage) do
 		-- Calculate padding to center content
-		local padding = default_padding - (#line / 2)
+		local padding = default_padding - math.floor(vim.fn.strdisplaywidth(line) / 2)
 		-- Create a separator with spaces to center content
 		local sep = string.rep(" ", padding)
 		-- Insert the content table
@@ -57,8 +54,11 @@ function M.print_homepage()
 
 	-- Apply the hightlight
 	for i = 0, #M.homepage - 1 do
-		vim.api.nvim_buf_add_highlight(buf, -1, M.opts.highlight, i, 0, -1)
+		vim.api.nvim_buf_add_highlight(buf, -1, M.opts.higlight, i, 0, -1)
 	end
+
+	-- Clean buffer user custom settings
+	M.clean_homepage(buf)
 end
 
 function M.clean_homepage(buf)
@@ -100,11 +100,12 @@ function M.setup(opts)
 	-- Load param options or use default values
 	M.opts.homepage_file = M.opts.homepage_file or "../data/homepage"
 	M.opts.higlight = M.opts.higlight or "RainbowDelimiterGreen"
+	M.load_homepage(M.opts.homepage_file)
 
 	vim.api.nvim_create_autocmd("VimEnter", {
 		callback = function()
 			if vim.fn.argc() == 0 then
-				M.load_homepage(M.opts.homepage_file)
+				M.print_homepage()
 			end
 		end,
 		pattern = "*",
